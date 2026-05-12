@@ -112,26 +112,34 @@ function closeProfileModal() {
 const inputsArr = ["name", "title", "email", "phone", "linkedin", "about", "experience", "education", "projectsText", "certifications", "skills"];
 
 window.onload = () => {
-    inputsArr.forEach(id => {
-        let el = document.getElementById(id);
-        if(el) {
-            if (localStorage.getItem(id)) el.value = localStorage.getItem(id);
-            el.addEventListener("input", () => {
-                localStorage.setItem(id, el.value);
-                generateCV();
-                if(typeof syncDataToFirebase === "function") syncDataToFirebase();
-            });
+    // 1. استرجاع البيانات برفق
+    try {
+        inputsArr.forEach(id => {
+            let el = document.getElementById(id);
+            if(el) {
+                if (localStorage.getItem(id)) el.value = localStorage.getItem(id);
+                el.addEventListener("input", () => {
+                    localStorage.setItem(id, el.value);
+                    generateCV();
+                    if(typeof syncDataToFirebase === "function") syncDataToFirebase();
+                });
+            }
+        });
+    } catch(e) { console.error("Error loading inputs:", e); }
+
+    // 2. تفعيل الدارك مود بأمان
+    try {
+        if(localStorage.getItem('theme') === 'dark') {
+            let htmlTag = document.getElementById('html-tag') || document.documentElement;
+            htmlTag.setAttribute('data-theme', 'dark');
+            let icon = document.getElementById('darkModeIcon');
+            if(icon) icon.classList.replace('fa-moon', 'fa-sun');
         }
-    });
+    } catch(e) { console.error("Error loading theme:", e); }
 
-    if(localStorage.getItem('theme') === 'dark') {
-        document.getElementById('html-tag').setAttribute('data-theme', 'dark');
-        let icon = document.getElementById('darkModeIcon');
-        if(icon) icon.classList.replace('fa-moon', 'fa-sun');
-    }
-
+    // 3. رسم الواجهة إجبارياً
     if(typeof renderPortfolio === "function") renderPortfolio();
-    generateCV();
+    generateCV(); // رسم الورقة
 };
 
 // --- [2] التحكم في الواجهة ---
