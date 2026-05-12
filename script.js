@@ -10,11 +10,89 @@ const firebaseConfig = {
     measurementId: "G-NLP20NPSGR"
 };
 
-// تهيئة السيرفر 
+// تهيئة السيرفر ونظام الحسابات
 if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
     var database = firebase.database();
+    var auth = firebase.auth(); // تفعيل نظام الحسابات
 }
+
+let currentUser = ""; // هنخزن فيه اسم المستخدم الحالي
+let currentRoom = null;
+
+// --- [0.5] نظام الحسابات والمراقبة (Authentication) ---
+if (typeof auth !== 'undefined') {
+    auth.onAuthStateChanged((user) => {
+        const authModal = document.getElementById('authModal');
+        if (user) {
+            // المستخدم مسجل دخول -> اخفي شاشة اللوجين
+            if(authModal) authModal.style.display = "none";
+            
+            // استخراج الاسم من الإيميل (مثال: ahmed@gmail.com -> ahmed)
+            currentUser = user.email.split('@')[0]; 
+            
+            // تجهيز واجهة الـ Team Mode
+            const disp = document.getElementById("currentUserDisp");
+            if(disp) disp.innerText = currentUser;
+            
+            const authUI = document.getElementById("authUI");
+            const roomUI = document.getElementById("roomUI");
+            if(authUI) authUI.style.display = "none"; // إخفاء إدخال الاسم القديم
+            if(roomUI) roomUI.style.display = "block"; // إظهار زراير الغرف
+        } else {
+            // المستخدم مش مسجل دخول -> اظهر شاشة اللوجين إجبارياً
+            if(authModal) authModal.style.display = "flex";
+        }
+    });
+}
+
+function registerUser() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    const errorMsg = document.getElementById('authError');
+    
+    if(!email || !password) return errorMsg.innerText = "Please enter email and password";
+    if(password.length < 6) return errorMsg.innerText = "Password must be at least 6 characters";
+    
+    errorMsg.innerText = "Creating account... ⏳";
+    
+    auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        alert("Account Created Successfully! 🎉");
+        document.getElementById('authEmail').value = "";
+        document.getElementById('authPassword').value = "";
+        errorMsg.innerText = "";
+    })
+    .catch((error) => {
+        errorMsg.innerText = error.message; 
+    });
+}
+
+function loginUser() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+    const errorMsg = document.getElementById('authError');
+    
+    if(!email || !password) return errorMsg.innerText = "Please enter email and password";
+    errorMsg.innerText = "Logging in... ⏳";
+    
+    auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        errorMsg.innerText = "";
+    })
+    .catch((error) => {
+        errorMsg.innerText = "Invalid Email or Password!";
+    });
+}
+
+function logoutUser() {
+    if(confirm("Are you sure you want to log out?")) {
+        auth.signOut().then(() => {
+            location.reload(); // تحديث الصفحة بعد الخروج
+        });
+    }
+}
+
 
 // --- [1] إعدادات النظام والمزامنة التلقائية ---
 const inputsArr = ["name", "title", "email", "phone", "linkedin", "about", "experience", "education", "projectsText", "certifications", "skills"];
@@ -587,18 +665,6 @@ function resetForm() {
 }
 
 // --- [10] محرك Team Mode اللحظي الشامل (Live Firebase Sync) ---
-let currentUser = "";
-let currentRoom = null;
-
-function loginTeam() {
-    const user = document.getElementById("teamUsername").value;
-    if(!user) return alert("Enter a username!");
-    currentUser = user;
-    document.getElementById("authUI").style.display = "none";
-    document.getElementById("roomUI").style.display = "block";
-    document.getElementById("currentUserDisp").innerText = currentUser;
-}
-
 function createRoom() {
     if(typeof database === 'undefined') return alert("تأكد من إضافة مكتبات فايربيز في ملف HTML أولاً!");
     
