@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" id="html-tag" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate OS | Workstation v5.0</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/compromise"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <aside class="main-sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-bolt"></i> <span class="nav-text">ULTIMATE</span>
+        </div>
+        <nav class="side-nav">
+            <button onclick="switchTab('cv-section', this)" class="nav-item active">
+                <i class="fas fa-id-card"></i> <span class="nav-text">CV Builder</span>
+            </button>
+            <button onclick="switchTab('portfolio-section', this)" class="nav-item">
+                <i class="fas fa-images"></i> <span class="nav-text">Portfolio</span>
+            </button>
+            <button onclick="switchTab('docs-section', this)" class="nav-item">
+                <i class="fas fa-file-signature"></i> <span class="nav-text">AI Docs</span>
+            </button>
+            <button onclick="switchTab('slides-section', this)" class="nav-item">
+                <i class="fas fa-tv"></i> <span class="nav-text">Presentations</span>
+            </button>
+            <button onclick="switchTab('english-section', this)" class="nav-item">
+                <i class="fas fa-language"></i> <span class="nav-text">English Test</span>
+            </button>
+            <button onclick="switchTab('team-section', this)" class="nav-item">
+                <i class="fas fa-users-cog"></i> <span class="nav-text">Team Mode</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="content-area">
+        <nav class="top-toolbar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn-action" style="background:var(--bg-secondary); color:var(--text-main);" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <select id="cvType" onchange="generateCV()" class="toolbar-select">
+                    <option value="modern">Modern Professional</option>
+                    <option value="ats">ATS Classic</option>
+                </select>
+
+                <input type="color" id="themeColor" value="#00e5ff" style="width:30px; height:30px; border:none; cursor:pointer; background:none;">
+                
+                <select id="langToggle" onchange="toggleLanguage()" class="toolbar-select">
+                    <option value="en">EN</option>
+                    <option value="ar">AR</option>
+                </select>
+
+                <button class="btn-action" onclick="toggleDarkMode()" style="background:var(--bg-secondary); color:var(--text-main);">
+                    <i class="fas fa-moon" id="darkModeIcon"></i>
+                </button>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" style="background:#10b981; color:white;" onclick="openJobPortal()">
+                    <i class="fas fa-briefcase"></i> Jobs
+                </button>
+                <button class="btn-action" style="background:#0f172a; color:white;" onclick="downloadPDF()">
+                    <i class="fas fa-download"></i> PDF
+                </button>
+            </div>
+        </nav>
+
+        <section id="cv-section" class="app-tab active">
+            <div class="editor-panel">
+                <div class="field-group"><label>Full Name</label><input id="name" placeholder="Mahmoud Mohamed"></div>
+                <div class="field-group"><label>Job Title</label><input id="title" placeholder="Professional Editor"></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="field-group"><label>Email</label><input id="email"></div>
+                    <div class="field-group"><label>Phone</label><input id="phone"></div>
+                </div>
+
+                <div class="field-group"><label>LinkedIn URL</label><input id="linkedin"></div>
+                <div class="field-group">
+                    <label>About Me <button onclick="aiGenerateAboutMe()" class="btn-action" style="background:var(--accent); color:#000; padding:2px 8px; font-size:10px; margin-left:10px;">🪄 AI Write</button></label>
+                    <textarea id="about" rows="3"></textarea>
+                </div>
+                <div class="field-group"><label>Experience</label><textarea id="experience" rows="3"></textarea></div>
+                
+                <div class="field-group"><label>Education</label><textarea id="education" rows="2" placeholder="BSc Computer Science - 2026"></textarea></div>
+                <div class="field-group"><label>Projects (Text)</label><textarea id="projectsText" rows="2" placeholder="CV-GEN SaaS Application"></textarea></div>
+                <div class="field-group"><label>Certifications</label><textarea id="certifications" rows="2" placeholder="AWS Certified Developer"></textarea></div>
+
+                <div class="field-group"><label>Skills (Skill-90, Skill-80)</label><textarea id="skills" rows="2"></textarea></div>
+                <div class="field-group"><label>Picture</label><input type="file" id="imageInput" accept="image/*"></div>
+
+                <button class="btn-action" style="background:#ef4444; color:white; width:100%; margin-top:10px;" onclick="resetForm()">Reset All</button>
+            </div>
+
+            <div class="preview-panel">
+                <div class="cv-wrapper" id="cvResult"></div>
+            </div>
+        </section>
+
+        <section id="portfolio-section" class="app-tab">
+            <div class="portfolio-container" style="padding: 40px; width: 100%; max-width: 1200px; margin: 0 auto; overflow-y: auto;">
+                <h2 style="color: var(--text-main); margin-bottom: 20px;">My Projects Portfolio</h2>
+                <div class="editor-panel" style="margin-bottom: 30px; background: var(--bg-secondary);">
+                    <div class="field-group"><label>Project Title</label><input id="portTitle" placeholder="e.g. HR Dashboard"></div>
+                    <div class="field-group"><label>Short Description</label><input id="portDesc" placeholder="e.g. Dashboard by Power BI"></div>
+                    <div class="field-group"><label>Project Image</label><input type="file" id="portImage" accept="image/*"></div>
+                    <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="addPortfolioItem()">Add to Portfolio</button>
+                </div>
+                <div id="portfolioGrid" class="portfolio-grid">
+                    </div>
+            </div>
+        </section>
+
+        <section id="docs-section" class="app-tab">
+            <div style="padding:40px; display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div style="width:100%; max-width:850px; margin-bottom:20px; display:flex; gap:10px;">
+                    <input type="text" id="aiDocPrompt" placeholder="What do you want to write about?" style="flex:1; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                    <button class="btn-action" style="background:var(--accent); color:#000;" onclick="aiGenerateArticleReal()">🪄 Generate with AI</button>
+                </div>
+                <div id="doc-canvas" contenteditable="true" style="width:100%; max-width:850px; height:650px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000;"></div>
+            </div>
+        </section>
+
+        <section id="slides-section" class="app-tab">
+            <div style="padding:40px; width:100%; max-width:900px; margin:0 auto; color:var(--text-main);">
+                <h2>PowerPoint Creator</h2>
+                <div class="editor-panel" style="margin-top:20px; background:var(--bg-secondary);">
+                    <div class="field-group"><label>Slide Title</label><input id="slideTitle" placeholder="Slide Heading"></div>
+                    <div class="field-group"><label>Slide Content</label><textarea id="slideContent" rows="4" placeholder="Bullet points..."></textarea></div>
+                    <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="addSlidePreview()">Add Slide</button>
+                </div>
+                
+                <div id="slidesPreviewList" style="margin-top:30px; display:flex; flex-direction:column; gap:15px;"></div>
+                
+                <button class="btn-action" style="background:#d83b01; color:white; width:100%; margin-top:20px; padding:15px; font-size:16px;" onclick="exportPPTX()">
+                    <i class="fas fa-file-powerpoint"></i> Download .PPTX File
+                </button>
+            </div>
+        </section>
+
+        <section id="english-section" class="app-tab">
+            <div style="padding:40px; width:100%; max-width:800px; margin:0 auto; color:var(--text-main);">
+                <div style="text-align:center; margin-bottom:30px;">
+                    <h2>English Proficiency Placement Test</h2>
+                    <p style="font-size:13px; color:#888; margin-top:10px;">
+                        * Disclaimer: This is an unofficial placement test. Questions are modeled after CEFR standards.
+                    </p>
+                </div>
+                
+                <div id="testContainer" style="background:var(--bg-secondary); padding:30px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="introTest">
+                        <p>This test contains 30 multiple-choice questions. It evaluates grammar, vocabulary, and reading comprehension.</p>
+                        <button class="btn-action" style="background:var(--accent); color:#000; margin-top:20px; width:100%; padding:15px;" onclick="startEnglishTest()">Start Test Now</button>
+                    </div>
+                    <div id="quizArea" style="display:none;">
+                        <h3 id="questionText" style="margin-bottom:20px;"></h3>
+                        <div id="optionsArea" style="display:flex; flex-direction:column; gap:10px;"></div>
+                        <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+                            <span id="questionCount" style="font-size:14px; color:#888;"></span>
+                            <button class="btn-action" style="background:var(--accent); color:#000;" onclick="nextQuestion()">Next</button>
+                        </div>
+                    </div>
+                    <div id="resultArea" style="display:none; text-align:center;">
+                        <h3>Your Test Result</h3>
+                        <h1 id="scoreDisplay" style="font-size:48px; color:var(--accent); margin:20px 0;"></h1>
+                        <p id="levelDisplay" style="font-size:18px; font-weight:bold;"></p>
+                        <button class="btn-action" style="background:#333; color:white; margin-top:20px;" onclick="resetTest()">Retake Test</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="team-section" class="app-tab">
+            <div style="padding:40px; width:100%; max-width:600px; margin:0 auto; color:var(--text-main); text-align:center;">
+                <h2>Team Collaboration (Workspace)</h2>
+                <p style="color:#888; margin-bottom:30px; font-size:14px;">Collaborate in real-time on presentations and docs.</p>
+                
+                <div id="authUI" class="editor-panel" style="background:var(--bg-secondary);">
+                    <h3>Login to Workspace</h3>
+                    <div class="field-group"><input id="teamUsername" placeholder="Enter your username"></div>
+                    <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="loginTeam()">Enter Workspace</button>
+                </div>
+
+                <div id="roomUI" class="editor-panel" style="background:var(--bg-secondary); display:none;">
+                    <h3>Welcome, <span id="currentUserDisp" style="color:var(--accent);"></span>!</h3>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button class="btn-action" style="flex:1; background:#10b981; color:white;" onclick="createRoom()">Create Room</button>
+                        <button class="btn-action" style="flex:1; background:#3b82f6; color:white;" onclick="joinRoomPrompt()">Join Room</button>
+                    </div>
+
+                    <div id="activeRoomArea" style="margin-top:30px; display:none; text-align:left;">
+                        <h4 style="border-bottom:1px solid #444; padding-bottom:10px;">Room: <span id="roomIdDisp"></span></h4>
+                        <p style="font-size:12px; color:#888; margin-top:5px;">You are: <span id="roleDisp"></span></p>
+                        
+                        <h5 style="margin-top:20px; margin-bottom:10px;">Team Members:</h5>
+                        <ul id="teamList" style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="jobPortalModal" class="modal-overlay">
+        <div style="background:var(--bg-main); color:var(--text-main); padding:30px; border-radius:12px; width:450px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
+            <h3>Smart Job Search 🚀</h3>
+            <p style="font-size:13px; color:#888; margin:15px 0;">Searching for: <b id="searchJobTitle"></b></p>
+            
+            <div style="background:var(--bg-secondary); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:20px;">
+                <h4 style="margin-bottom:10px; font-size:14px;">🧠 AI Job Matcher</h4>
+                <button class="btn-action" style="background:var(--accent); color:#000; width:100%; padding:10px;" onclick="runSmartJobMatch()">Analyze My CV & Find Matches</button>
+                <div id="aiMatchResults" style="margin-top:15px; font-size:13px; text-align:left; display:none;"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn-action" style="background:#0a66c2; color:white; width:100%; padding:12px;" onclick="executeSearch('linkedin')">Search on LinkedIn</button>
+                <button class="btn-action" style="background:#0055D9; color:white; width:100%; padding:12px;" onclick="executeSearch('wuzzuf')">Search on Wuzzuf</button>
+                <button class="btn-action" style="background:#2164f4; color:white; width:100%; padding:12px;" onclick="executeSearch('indeed')">Search on Indeed</button>
+            </div>
+            
+            <button onclick="closeJobPortal()" style="margin-top:20px; border:none; background:none; color:#888; cursor:pointer; font-size:14px; text-decoration:underline;">Close</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
