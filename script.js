@@ -1,7 +1,7 @@
-// --- [0] إعدادات قاعدة البيانات (Firebase Setup) ---
 const firebaseConfig = {
     apiKey: "AIzaSyAoaACXx4HXQ4RLodxf96LU77F73X6ZIvA",
     authDomain: "cv-gen-workspace.firebaseapp.com",
+    databaseURL: "https://cv-gen-workspace-default-rtdb.firebaseio.com", // <-- السطر ده مهم جداً
     projectId: "cv-gen-workspace",
     storageBucket: "cv-gen-workspace.firebasestorage.app",
     messagingSenderId: "164430613078",
