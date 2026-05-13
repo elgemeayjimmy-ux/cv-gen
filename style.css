@@ -327,36 +327,38 @@ button[onclick*="aiGenerate"]:hover {
     animation: glassReveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 /* --- التصميم المتجاوب للهواتف (Mobile Responsive & App-like Feel) --- */
-@media (max-width: 768px) {
+/* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
+@media screen and (max-width: 768px) {
     body {
-        grid-template-columns: 1fr; /* إلغاء التقسيم الجانبي */
-        overflow-y: auto;
+        display: block !important; /* إلغاء الجريد بتاع الكمبيوتر تماماً */
+        overflow-x: hidden; /* منع الشاشة من إنها تروح يمين وشمال */
     }
     
     .content-area {
-        height: auto;
-        min-height: 100vh;
-        overflow-x: hidden;
+        display: block;
+        width: 100vw;
     }
 
-    /* القائمة الجانبية في الموبايل (سحب من الجنب زي التطبيقات) */
+    /* إخفاء القائمة الجانبية وجعلها تطفو فوق الشاشة */
     .main-sidebar {
-        position: fixed;
+        position: fixed !important;
         top: 0;
-        left: -100%; /* مخفية بره الشاشة أوتوماتيك */
-        width: 280px;
+        left: -110% !important; /* مخفية بره الشاشة تماماً */
+        width: 280px !important;
         height: 100vh;
-        z-index: 3000;
-        box-shadow: 20px 0 50px rgba(0,0,0,0.7);
-        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9999 !important;
+        transition: left 0.4s ease-in-out !important;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.8);
     }
 
+    /* الكلاس اللي هيضيفه الجافاسكريبت عشان يفتح القائمة */
     .main-sidebar.mobile-open {
-        left: 0; /* تظهر لما تدوس على زرار القائمة */
+        left: 0 !important; 
     }
 
-    /* ترتيب الشريط العلوي ليتناسب مع الموبايل */
+    /* تظبيط الشريط العلوي */
     .top-toolbar {
+        display: flex;
         flex-direction: column;
         height: auto;
         padding: 15px;
@@ -364,57 +366,43 @@ button[onclick*="aiGenerate"]:hover {
     }
 
     .top-toolbar > div {
+        display: flex;
         flex-wrap: wrap;
         justify-content: center;
         width: 100%;
-    }
-
-    /* تظبيط زراير البروفايل والخروج اللي كانت طايرة */
-    div[style*="position: absolute; top: 15px"] {
-        position: relative !important;
-        top: 0 !important;
-        right: 0 !important;
-        justify-content: center;
-        margin-top: 5px;
-        width: 100%;
-        margin-bottom: 10px;
+        gap: 10px;
     }
 
     /* رص خانات الـ CV والورقة تحت بعض */
     #cv-section.active {
-        grid-template-columns: 1fr;
-        gap: 20px;
+        display: flex !important;
+        flex-direction: column;
+        padding: 10px;
     }
 
     .editor-panel {
-        max-height: 55vh; /* تصغير ارتفاع الخانات عشان المستخدم يعرف يعمل سكرول لورقة الـ CV */
+        width: 100%;
+        max-height: 50vh;
     }
 
-    /* تصغير حجم الورقة عشان تبقى Fit في شاشة الموبايل */
+    .preview-panel {
+        width: 100%;
+        padding: 0;
+        margin-top: 20px;
+    }
+
+    /* تصغير الورقة عشان تيجي على قد الموبايل */
     .cv-wrapper {
         zoom: 0.42; 
+        margin: 0 auto;
     }
 
-    /* ترتيب البورتفوليو ليكون كارت واحد في الصف */
     .portfolio-grid {
         grid-template-columns: 1fr;
     }
-    
-    /* تظبيط مقاسات صفحة الذكاء الاصطناعي (AI Docs) */
-    #docs-section > div {
-        padding: 15px !important;
-    }
-    
-    #doc-canvas {
-        padding: 20px !important;
-        font-size: 14px !important;
-        height: auto;
-        min-height: 500px !important;
-    }
 
-    /* النوافذ المنبثقة (Modals) */
     .modal-overlay > div, #authModal > div, #profileModal > div {
-        width: 90% !important;
-        padding: 25px !important;
+        width: 95% !important;
+        padding: 20px !important;
     }
 }
