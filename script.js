@@ -211,9 +211,15 @@ window.onload = () => {
     generateCV(); 
 };
 
-// --- [2] التحكم في الواجهة ---
+// --- [2] التحكم في الواجهة (دعم ذكي للموبايل والكمبيوتر) ---
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('collapsed');
+    // لو شاشة موبايل، افتح القائمة بطريقة السحب
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+    } else {
+        // لو كمبيوتر، صغر القائمة زي ما هي
+        document.getElementById('sidebar').classList.toggle('collapsed');
+    }
 }
 
 function switchTab(tabId, btn) {
@@ -223,6 +229,11 @@ function switchTab(tabId, btn) {
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     if(btn) btn.classList.add('active');
+
+    // قفل القائمة الجانبية أوتوماتيك في الموبايل بعد ما تختار قسم
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('mobile-open');
+    }
 }
 
 function toggleDarkMode() {
