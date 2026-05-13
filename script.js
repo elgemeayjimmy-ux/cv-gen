@@ -845,3 +845,22 @@ function syncDataToFirebase() {
     });
     database.ref('rooms/' + currentRoom + '/cvData').set(dataToSync);
 }
+// --- كود إضافي: إغلاق القائمة الجانبية عند الضغط خارجها (للموبايل) ---
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    
+    // لو إحنا على شاشة موبايل والقائمة مفتوحة حالياً
+    if (window.innerWidth <= 768 && sidebar.classList.contains('mobile-open')) {
+        
+        // التأكد إن الضغطة مكنتش جوا القائمة الجانبية
+        const clickedInsideSidebar = sidebar.contains(event.target);
+        
+        // التأكد إن الضغطة مكنتش على زرار الهامبرجر اللي بيفتحها
+        const clickedToggleButton = event.target.closest('button[onclick="toggleSidebar()"]');
+        
+        // لو الضغطة برا القائمة وبرا الزرار.. اقفل القائمة فوراً
+        if (!clickedInsideSidebar && !clickedToggleButton) {
+            sidebar.classList.remove('mobile-open');
+        }
+    }
+});
