@@ -17,8 +17,8 @@ if (typeof firebase !== 'undefined') {
     var auth = firebase.auth(); 
 }
 
-currentUser = ""; 
-currentRoom = null;
+let currentUser = ""; 
+let currentRoom = null;
 
 // --- [0.5] نظام الحسابات والبروفايل (Authentication & Profile) ---
 if (typeof auth !== 'undefined') {
@@ -33,6 +33,10 @@ if (typeof auth !== 'undefined') {
             
             if(document.getElementById("authUI")) document.getElementById("authUI").style.display = "none";
             if(document.getElementById("roomUI")) document.getElementById("roomUI").style.display = "block";
+
+            // جلب البيانات الخاصة بالحساب من الكلاود
+            loadUserPersonalData(user.uid);
+
         } else {
             if(authModal) authModal.style.display = "flex";
         }
@@ -70,6 +74,8 @@ function loginUser() {
 
 function logoutUser() {
     if(confirm("Are you sure you want to log out?")) {
+        // مسح الذاكرة المحلية لضمان عدم ظهور بياناتك لأي شخص آخر
+        localStorage.clear(); 
         auth.signOut().then(() => { location.reload(); });
     }
 }
@@ -107,7 +113,73 @@ function closeProfileModal() {
     document.getElementById('profileModal').style.display = "none";
 }
 
-// --- [1] إعدادات النظام والمزامنة التلقائية ---
+// --- [0.6] نظام التخزين السحابي الخاص بكل حساب (Cloud Personal Storage) ---
+function loadUserPersonalData(uid) {
+    if(typeof database === 'undefined') return;
+    
+    // جلب بيانات الـ CV
+    database.ref('users/' + uid + '/cvData').once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            inputsArr.forEach(id => {
+                if(data[id] !== undefined) {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.value = data[id];
+                        localStorage.setItem(id, data[id]);
+                    }
+                }
+            });
+            if(data.profileImage) localStorage.setItem("profileImage", data.profileImage);
+            generateCV();
+        } else {
+            // لو حساب جديد، نفضي الخانات تماماً
+            inputsArr.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
+            localStorage.removeItem("profileImage");
+            generateCV();
+        }
+    });
+
+    // جلب بيانات البورتفوليو
+    database.ref('users/' + uid + '/portfolio').once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            projectsData = data;
+            localStorage.setItem('myPortfolio', JSON.stringify(projectsData));
+        } else {
+            projectsData = [];
+            localStorage.removeItem('myPortfolio');
+        }
+        renderPortfolio();
+    });
+}
+
+function savePersonalDataToCloud() {
+    const user = auth?.currentUser;
+    if(!user || typeof database === 'undefined') return;
+    
+    const d = {};
+    inputsArr.forEach(id => {
+        let el = document.getElementById(id);
+        if(el) d[id] = el.value;
+    });
+    d.profileImage = localStorage.getItem("profileImage") || "";
+    
+    // حفظ البيانات في السيرفر تحت كود اليوزر
+    database.ref('users/' + user.uid + '/cvData').set(d);
+}
+
+function syncPortfolioToCloud() {
+    const user = auth?.currentUser;
+    if(user && typeof database !== 'undefined') {
+        database.ref('users/' + user.uid + '/portfolio').set(projectsData);
+    }
+}
+
+// --- [1] إعدادات النظام والمزامنة ---
 const inputsArr = ["name", "title", "email", "phone", "linkedin", "about", "experience", "education", "projectsText", "certifications", "skills"];
 
 window.onload = () => {
@@ -120,6 +192,7 @@ window.onload = () => {
                     localStorage.setItem(id, el.value);
                     generateCV();
                     if(typeof syncDataToFirebase === "function") syncDataToFirebase();
+                    savePersonalDataToCloud(); // رفع التعديل للكلاود فوراً
                 });
             }
         });
@@ -283,6 +356,7 @@ function addPortfolioItem() {
             
             try {
                 localStorage.setItem('myPortfolio', JSON.stringify(projectsData));
+                syncPortfolioToCloud(); // رفع المحفظة للكلاود
                 document.getElementById("portTitle").value = "";
                 document.getElementById("portDesc").value = "";
                 fileInput.value = "";
@@ -317,10 +391,11 @@ function renderPortfolio() {
 function deletePortfolio(index) {
     projectsData.splice(index, 1);
     localStorage.setItem('myPortfolio', JSON.stringify(projectsData));
+    syncPortfolioToCloud(); // تحديث الحذف في الكلاود
     renderPortfolio();
 }
 
-// --- [5] محرك الذكاء الاصطناعي التلقائي (Auto-Detect AI Model) ---
+// --- [5] محرك الذكاء الاصطناعي (Gemini API) ---
 const GEMINI_API_KEY = "AIzaSyC7jzoBsgfIckzLDD_iddXGHWC7Yq8DGzM"; 
 
 async function fetchRealAI(promptText) {
@@ -329,51 +404,34 @@ async function fetchRealAI(promptText) {
     }
     
     let modelToUse = "";
-    
-    // 1. السؤال الأول: الكود هيكلم سيرفرات جوجل ويطلب منها قايمة الموديلات الشغالة للمفتاح ده
     try {
         const modelsReq = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
         const modelsData = await modelsReq.json();
-        
         if (modelsData.models) {
-            // هنفلتر الموديلات اللي بتفهم أوامر نصية بس
             const validModels = modelsData.models.filter(m => 
                 m.supportedGenerationMethods && 
                 m.supportedGenerationMethods.includes("generateContent") && 
                 m.name.includes("gemini")
             );
-            
             if (validModels.length > 0) {
-                // الكود هيسحب أول موديل شغال أوتوماتيك (سواء 1.5 أو 2.0 أو حتى 3.0)
                 const flashModel = validModels.find(m => m.name.includes("flash"));
                 modelToUse = flashModel ? flashModel.name : validModels[0].name;
-            } else {
-                return "⚠️ مفتاح الـ API سليم ولكنه لا يمتلك صلاحية استخدام موديلات الذكاء الاصطناعي.";
-            }
-        } else if (modelsData.error) {
-             return `⚠️ خطأ في المفتاح: ${modelsData.error.message}`;
-        }
+            } else return "⚠️ المفتاح سليم ولكن لا يمتلك صلاحية الذكاء الاصطناعي.";
+        } else if (modelsData.error) return `⚠️ خطأ: ${modelsData.error.message}`;
     } catch (e) {
-        return "⚠️ فشل الاتصال بسيرفرات جوجل للتحقق من الموديلات.";
+        return "⚠️ فشل الاتصال بخوادم جوجل.";
     }
 
-    // 2. التنفيذ: بعد ما الكود عرف اسم الموديل الشغال، هيبعتله الطلب
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelToUse}:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
         });
-
         const data = await response.json();
-        if (response.ok) {
-            return data.candidates[0].content.parts[0].text;
-        } else {
-            return `API Error (${modelToUse}): ${data.error?.message || 'تم رفض الطلب'}`;
-        }
-    } catch (error) {
-        return "خطأ في الاتصال. الرجاء التحقق من الإنترنت.";
-    }
+        if (response.ok) return data.candidates[0].content.parts[0].text;
+        else return `API Error: ${data.error?.message || 'تم رفض الطلب'}`;
+    } catch (error) { return "خطأ في الاتصال بالإنترنت."; }
 }
 
 async function aiGenerateAboutMe() {
@@ -387,13 +445,13 @@ async function aiGenerateAboutMe() {
     let prompt = `Write a highly personalized, confident, and professional 'About Me' summary for a CV.\nMy current Job Title: ${job}`;
     if (skills) prompt += `\nMy Skills: ${skills}`;
     if (experience) prompt += `\nBrief Experience: ${experience}`;
-    
     prompt += `\nInstructions: Write STRICTLY in the FIRST PERSON. DO NOT use my name. Keep it under 50 words. Provide ONLY the final text.`;
     
     const result = await fetchRealAI(prompt);
     aboutBox.value = result;
     localStorage.setItem("about", result);
     generateCV();
+    savePersonalDataToCloud(); // رفع النبذة للكلاود
 }
 
 async function aiGenerateArticleReal() {
@@ -559,7 +617,7 @@ function resetTest() {
     document.getElementById("introTest").style.display = "block";
 }
 
-// --- [8] محرك الوظائف والمطابقة الذكية ---
+// --- [8] محرك الوظائف ---
 function openJobPortal() {
     const jobTitle = document.getElementById("title") ? document.getElementById("title").value : "Developer";
     const jobTitleDisplay = document.getElementById("searchJobTitle");
@@ -594,19 +652,13 @@ window.runSmartJobMatch = async function() {
         const resultDiv = document.getElementById("aiMatchResults");
         const btn = document.querySelector("button[onclick='runSmartJobMatch()']");
         
-        if(!resultDiv) {
-            alert("خطأ: الـ HTML الخاص بعرض النتيجة مش موجود!");
-            return;
-        }
+        if(!resultDiv) return;
 
         const title = document.getElementById("title") ? document.getElementById("title").value : "Professional";
         const skills = document.getElementById("skills") ? document.getElementById("skills").value : "";
         const experience = document.getElementById("experience") ? document.getElementById("experience").value : "";
         
-        if (!skills && !experience) {
-            alert("يرجى إضافة بعض المهارات أو الخبرة في الـ CV أولاً!");
-            return;
-        }
+        if (!skills && !experience) return alert("يرجى إضافة بعض المهارات أو الخبرة في الـ CV أولاً!");
 
         if(btn) {
             btn.innerText = "Analyzing CV... ⏳";
@@ -616,18 +668,12 @@ window.runSmartJobMatch = async function() {
         resultDiv.innerHTML = "<p style='text-align:center; color:#888;'>Reading your profile and scanning the market...</p>";
 
         const prompt = `Act as an expert Tech Recruiter. Analyze this candidate's profile:
-        Job Title: ${title}
-        Skills: ${skills}
-        Experience: ${experience}
-        
+        Job Title: ${title}\nSkills: ${skills}\nExperience: ${experience}
         Based on this, suggest the top 3 best-fitting job titles in the current market. 
-        Format the output EXACTLY like this HTML (do not use markdown formatting):
-        <ul style='list-style:none; padding:0;'>
-          <li style='margin-bottom:10px;'><b>1. [Job Title]</b> <span style='color:green;'>(XX% Match)</span><br><span style='color:#666; font-size:11px;'>Why: [1 short sentence]</span></li>
-        </ul>`;
+        Format EXACTLY like this HTML:
+        <ul style='list-style:none; padding:0;'><li style='margin-bottom:10px;'><b>1. [Job Title]</b> <span style='color:green;'>(XX% Match)</span><br><span style='color:#666; font-size:11px;'>Why: [1 short sentence]</span></li></ul>`;
 
         let result = await fetchRealAI(prompt);
-        
         result = result.replace(/```html|```/g, '');
         resultDiv.innerHTML = result;
         
@@ -635,10 +681,7 @@ window.runSmartJobMatch = async function() {
             btn.innerText = "Analyze My CV & Find Matches";
             btn.disabled = false;
         }
-    } catch (error) {
-        alert("حصل مشكلة في الاتصال: " + error.message);
-        console.error("Job Matcher Error: ", error);
-    }
+    } catch (error) { console.error(error); }
 };
 
 // --- [9] أدوات مساعدة إضافية ---
@@ -660,7 +703,7 @@ function downloadPDF() {
 
     html2pdf().set(opt).from(element).save().then(() => {
         element.style.zoom = "0.65";
-        element.style.boxShadow = "0 15px 40px rgba(0,0,0,0.15)";
+        element.style.boxShadow = "var(--glass-shadow)";
         element.style.height = "auto";
         element.style.overflow = "visible";
     });
@@ -677,6 +720,7 @@ document.getElementById("imageInput")?.addEventListener("change", (e) => {
     reader.onload = (f) => {
         localStorage.setItem("profileImage", f.target.result);
         generateCV();
+        savePersonalDataToCloud(); 
     };
     if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
 });
@@ -699,27 +743,25 @@ function loginTeam() {
 }
 
 function createRoom() {
-    if(typeof database === 'undefined') return alert("تأكد من إضافة مكتبات فايربيز في ملف HTML أولاً!");
+    if(typeof database === 'undefined') return alert("تأكد من إضافة مكتبات فايربيز!");
     
     const roomId = Math.floor(1000 + Math.random() * 9000).toString();
     currentRoom = roomId;
     
     database.ref('rooms/' + roomId + '/members/' + currentUser).set({ role: "Admin (Creator)" });
-    
     setupRoomUI(roomId, "Admin (Creator)");
     listenToRoomSync();
     alert(`Room created! Share ID: ${roomId} with your team.`);
 }
 
 function joinRoomPrompt() {
-    if(typeof database === 'undefined') return alert("تأكد من إضافة مكتبات فايربيز في ملف HTML أولاً!");
+    if(typeof database === 'undefined') return alert("تأكد من إضافة مكتبات فايربيز!");
     
     const roomId = prompt("Enter Room ID:");
     if(!roomId) return;
     currentRoom = roomId;
 
     database.ref('rooms/' + roomId + '/members/' + currentUser).set({ role: "Member" });
-
     setupRoomUI(roomId, "Member");
     listenToRoomSync();
 }
@@ -739,7 +781,7 @@ function listenToRoomSync() {
         for(let name in members) {
             let icon = members[name].role.includes("Admin") ? "👑" : "👤";
             let you = name === currentUser ? " (You)" : "";
-            listHTML += `<li style="background:#222; padding:8px; border-radius:4px; color:white; margin-bottom:5px;">${icon} ${name} ${you}</li>`;
+            listHTML += `<li style="background:rgba(255,255,255,0.1); padding:8px; border-radius:4px; margin-bottom:5px;">${icon} ${name} ${you}</li>`;
         }
         document.getElementById("teamList").innerHTML = listHTML;
     });
