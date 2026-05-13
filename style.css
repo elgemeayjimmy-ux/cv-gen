@@ -344,6 +344,22 @@ button[onclick*="aiGenerate"]:hover {
 }
 
 /* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
+/* --- إصلاحات الشريط العلوي (لمنع التداخل) --- */
+.toolbar-select {
+    width: auto !important; /* منع القوائم من التمدد بشكل بشع */
+    padding: 8px 15px !important;
+}
+
+.content-area {
+    grid-template-rows: auto 1fr !important; /* السماح للشريط بالنزول بهدوء بدون ما يغطي الخانات */
+}
+
+.top-toolbar {
+    height: auto !important;
+    min-height: var(--toolbar-h);
+}
+
+/* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
 @media screen and (max-width: 768px) {
     body {
         display: block !important;
