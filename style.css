@@ -151,7 +151,6 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* هذا الجزء الذي كان مفقوداً وسبب اللخبطة */
 .field-group {
     display: flex;
     flex-direction: column;
@@ -170,7 +169,7 @@ body {
 }
 
 .toolbar-select, .field-group input, .field-group textarea, #aiDocPrompt {
-    width: 100%; /* إرجاع العرض الكامل للحقول */
+    width: 100%;
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
@@ -295,7 +294,7 @@ button[onclick*="aiGenerate"]:hover {
     border-radius: 10px; 
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
-/* --- إصلاح شاشة الوظائف المنبثقة (Job Portal Modal Fix) --- */
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -307,7 +306,7 @@ button[onclick*="aiGenerate"]:hover {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-/* --- أنيميشن التنقل بين القوائم (Smooth Tab Transitions) --- */
+
 @keyframes glassReveal {
     0% {
         opacity: 0;
@@ -323,45 +322,25 @@ button[onclick*="aiGenerate"]:hover {
 
 .app-tab.active {
     display: grid;
-    /* تشغيل الأنيميشن بنعومة فائقة عند فتح أي قائمة */
     animation: glassReveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
-/* --- التصميم المتجاوب للهواتف (Mobile Responsive & App-like Feel) --- */
-/* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
-/* --- إصلاحات الشريط العلوي (لمنع التداخل) --- */
-.toolbar-select {
-    width: auto !important; /* منع القوائم من التمدد بشكل بشع */
-    padding: 8px 15px !important;
-}
 
-.content-area {
-    grid-template-rows: auto 1fr !important; /* السماح للشريط بالنزول بهدوء بدون ما يغطي الخانات */
-}
+/* كلاسات التحكم في الإظهار والإخفاء حسب الشاشة */
+.show-on-mobile { display: none !important; }
 
-.top-toolbar {
-    height: auto !important;
-    min-height: var(--toolbar-h);
-}
-
-/* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
-/* --- إصلاحات الشريط العلوي (لمنع التداخل) --- */
-.toolbar-select {
-    width: auto !important; /* منع القوائم من التمدد بشكل بشع */
-    padding: 8px 15px !important;
-}
-
-.content-area {
-    grid-template-rows: auto 1fr !important; /* السماح للشريط بالنزول بهدوء بدون ما يغطي الخانات */
-}
-
-.top-toolbar {
-    height: auto !important;
-    min-height: var(--toolbar-h);
-}
-
-/* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
 /* --- التصميم المتجاوب للهواتف (Clean & Premium Mobile Layout) --- */
 @media screen and (max-width: 768px) {
+    /* هنا بنظهر ونخفي العناصر الخاصة بالموبايل والكمبيوتر */
+    .hide-on-mobile { display: none !important; }
+    
+    .show-on-mobile.mobile-bottom-menu {
+        display: block !important;
+        padding: 20px;
+        border-top: 1px solid var(--glass-border);
+        margin-top: auto;
+    }
+    .show-on-mobile { display: block !important; }
+
     body {
         overflow-y: auto !important;
         overflow-x: hidden !important;
@@ -375,7 +354,6 @@ button[onclick*="aiGenerate"]:hover {
         min-height: 100vh;
     }
 
-    /* القائمة الجانبية المنسدلة */
     .main-sidebar {
         position: fixed !important;
         top: 0;
@@ -391,7 +369,6 @@ button[onclick*="aiGenerate"]:hover {
         left: 0 !important; 
     }
 
-    /* --- تنظيف الشريط العلوي وإعطاء مساحات مريحة --- */
     .top-toolbar {
         display: flex !important;
         flex-direction: column !important;
@@ -401,7 +378,6 @@ button[onclick*="aiGenerate"]:hover {
         background: var(--glass-bg);
     }
 
-    /* ترتيب العناصر داخل الشريط بشكل شبكي منظم */
     .top-toolbar > div {
         display: flex !important;
         flex-wrap: wrap !important;
@@ -411,86 +387,62 @@ button[onclick*="aiGenerate"]:hover {
         gap: 10px !important;
     }
 
-    /* إجبار القوائم المنسدلة (Select) على أخذ مساحة متساوية ومريحة */
     .toolbar-select {
-        flex: 1; /* تتمدد بذكاء */
+        flex: 1; 
         min-width: 140px;
-        max-width: 48%; /* عشان يجوا جنب بعض بالظبط */
+        max-width: 48%; 
         font-size: 13px !important;
         padding: 10px !important;
     }
 
-    /* إصلاح زراير البروفايل والخروج اللي كانت طايرة وبتبوظ الدنيا */
-    div[style*="position: absolute"], 
-    #authUI, 
-    #roomUI {
-        position: relative !important;
-        top: auto !important;
-        right: auto !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 10px !important;
-        width: 100% !important;
-        margin-top: 5px !important;
-    }
-
-    /* الزراير كلها تاخد مساحات مريحة وتتمدد بشكل شيك */
-    .btn-action {
-        padding: 10px 15px !important;
-        font-size: 12px !important;
-        flex-grow: 1; /* الزرار يملأ الفراغ بشياكة */
-        text-align: center;
-    }
-
-    /* منطقة العمل (الخانات) تاخد مساحة تتنفس فيها */
+    /* 🔥 الحل الجذري لمشكلة تداخل الصفحات 🔥 */
+    /* المشكلة كانت في الكلاس ده إنه كان بيخلي كله يظهر غصب عنه */
     .app-tab {
         padding: 15px !important;
-        display: flex !important;
+        display: none !important; /* دي اللي حلت المشكلة */
+    }
+
+    .app-tab.active {
+        display: flex !important; /* الصفحة النشطة بس هي اللي هتظهر */
         flex-direction: column !important;
     }
 
     #cv-section.active {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 30px !important; /* مساحة كبيرة بين الخانات والورقة */
+        gap: 30px !important; 
     }
 
-    /* لوحة الخانات */
     .editor-panel {
         width: 100% !important;
         padding: 20px !important;
-        max-height: none !important; /* الخانات تفرد براحتها لتحت مفيش سكرول داخلي يضايقك */
+        max-height: none !important; 
         overflow: visible !important;
     }
 
     .field-group {
-        margin-bottom: 15px !important; /* مسافة بين كل خانة والتانية */
+        margin-bottom: 15px !important; 
     }
 
     .field-group input, 
     .field-group textarea {
-        padding: 15px !important; /* تكبير الخانات لسهولة الكتابة بالموبايل */
+        padding: 15px !important; 
         font-size: 14px !important;
     }
 
-    /* الورقة (الـ CV) */
     .preview-panel {
         width: 100% !important;
         padding: 0 !important;
         display: flex !important;
         justify-content: center !important;
-        overflow-x: auto !important; /* لو الورقة أعرض، اليوزر يسحبها يمين وشمال */
+        overflow-x: auto !important; 
         padding-bottom: 40px !important;
     }
 
     .cv-wrapper {
-        zoom: 0.45 !important; /* نسبة مناسبة وواضحة لمعظم الشاشات */
+        zoom: 0.45 !important; 
         margin: 0 auto !important;
         transform-origin: top center !important;
     }
     
-    /* تظبيط النوافذ المنبثقة (زي تسجيل الدخول) */
     .modal-overlay > div {
         width: 92% !important;
         max-height: 85vh !important;
