@@ -16,8 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 </head>
 <body>
@@ -73,8 +71,6 @@
                     <option value="ats">ATS Classic</option>
                 </select>
 
-                <input type="color" id="themeColor" value="#00e5ff" style="width:30px; height:30px; border:none; cursor:pointer; background:none;">
-                
                 <select id="langToggle" onchange="toggleLanguage()" class="toolbar-select">
                     <option value="en">EN</option>
                     <option value="ar">AR</option>
@@ -103,7 +99,7 @@
 
         <section id="cv-section" class="app-tab active">
             <div class="editor-panel">
-                <div class="field-group"><label>Full Name</label><input id="name" placeholder="Mahmoud Mohamed"></div>
+                <div class="field-group"><label>Full Name</label><input id="name" placeholder="Full Name"></div>
                 <div class="field-group"><label>Job Title</label><input id="title" placeholder="Professional Editor"></div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -113,7 +109,7 @@
 
                 <div class="field-group"><label>LinkedIn URL</label><input id="linkedin"></div>
                 <div class="field-group">
-                    <label>About Me <button onclick="aiGenerateAboutMe()" class="btn-action" style="background:var(--accent); color:#000; padding:2px 8px; font-size:10px; margin-left:10px;">🪄 AI Write</button></label>
+                    <label>About Me <button onclick="aiGenerateAboutMe()" class="btn-action" style="background:var(--accent); color:#000; padding:2px 8px; font-size:10px; margin-left:10px;">✨ AI Write</button></label>
                     <textarea id="about" rows="3"></textarea>
                 </div>
                 <div class="field-group"><label>Experience</label><textarea id="experience" rows="3"></textarea></div>
@@ -151,9 +147,9 @@
             <div style="padding:40px; display:flex; flex-direction:column; align-items:center; width:100%;">
                 <div style="width:100%; max-width:850px; margin-bottom:20px; display:flex; gap:10px;">
                     <input type="text" id="aiDocPrompt" placeholder="What do you want to write about?" style="flex:1; padding:10px; border-radius:5px; border:1px solid #ccc;">
-                    <button class="btn-action" style="background:var(--accent); color:#000;" onclick="aiGenerateArticleReal()">🪄 Generate with AI</button>
+                    <button class="btn-action" style="background:var(--accent); color:#000;" onclick="aiGenerateArticleReal()">✨ Generate with AI</button>
                 </div>
-                <div id="doc-canvas" contenteditable="true" style="width:100%; max-width:850px; height:650px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000;"></div>
+                <div id="doc-canvas" contenteditable="true" sty<div id="doc-canvas" contenteditable="true" style="width:100%; max-width:850px; min-height:800px; height:auto; margin-bottom:40px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000; overflow-y:auto;"></div>le="width:100%; max-width:850px; height:650px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000;"></div>
             </div>
         </section>
 
@@ -240,11 +236,11 @@
 
     <div id="jobPortalModal" class="modal-overlay">
         <div style="background:var(--bg-main); color:var(--text-main); padding:30px; border-radius:12px; width:450px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
-            <h3>Smart Job Search 🚀</h3>
+            <h3>Smart Job Search 💼</h3>
             <p style="font-size:13px; color:#888; margin:15px 0;">Searching for: <b id="searchJobTitle"></b></p>
             
             <div style="background:var(--bg-secondary); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:20px;">
-                <h4 style="margin-bottom:10px; font-size:14px;">🧠 AI Job Matcher</h4>
+                <h4 style="margin-bottom:10px; font-size:14px;">🤖 AI Job Matcher</h4>
                 <button class="btn-action" style="background:var(--accent); color:#000; width:100%; padding:10px;" onclick="runSmartJobMatch()">Analyze My CV & Find Matches</button>
                 <div id="aiMatchResults" style="margin-top:15px; font-size:13px; text-align:left; display:none;"></div>
             </div>
@@ -260,14 +256,6 @@
     </div>
 
     <script src="script.js"></script>
-    <div style="position: absolute; top: 15px; right: 20px; z-index: 1000; display: flex; gap: 10px;">
-        <button onclick="openProfileModal()" style="background:var(--accent); color:#000; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px;">
-            👤 <span id="profileBtnName">Profile</span>
-        </button>
-        <button onclick="logoutUser()" style="background:#ff4757; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px;">
-            Logout
-        </button>
-    </div>
 
     <div id="profileModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
         <div style="background:var(--bg-secondary); padding:40px; border-radius:15px; text-align:center; width:350px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
