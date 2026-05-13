@@ -360,20 +360,22 @@ button[onclick*="aiGenerate"]:hover {
 }
 
 /* --- التصميم المتجاوب للهواتف (Mobile Responsive) --- */
+/* --- التصميم المتجاوب للهواتف (Clean & Premium Mobile Layout) --- */
 @media screen and (max-width: 768px) {
     body {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         display: block !important;
-        overflow-x: hidden;
     }
     
     .content-area {
         display: flex !important;
-        flex-direction: column;
-        height: 100vh;
-        width: 100vw;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 100vh;
     }
 
-    /* إخفاء القائمة الجانبية بسلاسة */
+    /* القائمة الجانبية المنسدلة */
     .main-sidebar {
         position: fixed !important;
         top: 0;
@@ -381,7 +383,7 @@ button[onclick*="aiGenerate"]:hover {
         width: 280px !important;
         height: 100vh;
         z-index: 9999 !important;
-        transition: left 0.4s ease-in-out !important;
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 20px 0 50px rgba(0,0,0,0.8);
     }
 
@@ -389,57 +391,109 @@ button[onclick*="aiGenerate"]:hover {
         left: 0 !important; 
     }
 
-    /* ترتيب الشريط العلوي بأناقة */
+    /* --- تنظيف الشريط العلوي وإعطاء مساحات مريحة --- */
     .top-toolbar {
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-        gap: 15px;
-    }
-
-    .top-toolbar > div {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        gap: 8px;
-    }
-
-    /* ترتيب منطقة العمل (الخانات فوق والورقة تحت) */
-    .app-tab {
-        overflow-y: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
         height: auto !important;
+        padding: 20px 15px !important;
+        gap: 15px !important;
+        background: var(--glass-bg);
+    }
+
+    /* ترتيب العناصر داخل الشريط بشكل شبكي منظم */
+    .top-toolbar > div {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 10px !important;
+    }
+
+    /* إجبار القوائم المنسدلة (Select) على أخذ مساحة متساوية ومريحة */
+    .toolbar-select {
+        flex: 1; /* تتمدد بذكاء */
+        min-width: 140px;
+        max-width: 48%; /* عشان يجوا جنب بعض بالظبط */
+        font-size: 13px !important;
+        padding: 10px !important;
+    }
+
+    /* إصلاح زراير البروفايل والخروج اللي كانت طايرة وبتبوظ الدنيا */
+    div[style*="position: absolute"], 
+    #authUI, 
+    #roomUI {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-top: 5px !important;
+    }
+
+    /* الزراير كلها تاخد مساحات مريحة وتتمدد بشكل شيك */
+    .btn-action {
+        padding: 10px 15px !important;
+        font-size: 12px !important;
+        flex-grow: 1; /* الزرار يملأ الفراغ بشياكة */
+        text-align: center;
+    }
+
+    /* منطقة العمل (الخانات) تاخد مساحة تتنفس فيها */
+    .app-tab {
         padding: 15px !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     #cv-section.active {
         display: flex !important;
-        flex-direction: column;
-        gap: 25px;
+        flex-direction: column !important;
+        gap: 30px !important; /* مساحة كبيرة بين الخانات والورقة */
     }
 
+    /* لوحة الخانات */
     .editor-panel {
-        width: 100%;
-        max-height: none; /* إعطاء مساحة للخانات لعدم القص */
-    }
-
-    .preview-panel {
-        width: 100%;
-        padding: 0;
-        overflow: hidden;
-    }
-
-    /* تظبيط حجم ورقة الـ CV */
-    .cv-wrapper {
-        zoom: 0.42; 
-        margin: 0 auto;
-        transform-origin: top center;
-    }
-
-    /* النوافذ المنبثقة */
-    .modal-overlay > div, #authModal > div, #profileModal > div {
-        width: 95% !important;
+        width: 100% !important;
         padding: 20px !important;
+        max-height: none !important; /* الخانات تفرد براحتها لتحت مفيش سكرول داخلي يضايقك */
+        overflow: visible !important;
+    }
+
+    .field-group {
+        margin-bottom: 15px !important; /* مسافة بين كل خانة والتانية */
+    }
+
+    .field-group input, 
+    .field-group textarea {
+        padding: 15px !important; /* تكبير الخانات لسهولة الكتابة بالموبايل */
+        font-size: 14px !important;
+    }
+
+    /* الورقة (الـ CV) */
+    .preview-panel {
+        width: 100% !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        overflow-x: auto !important; /* لو الورقة أعرض، اليوزر يسحبها يمين وشمال */
+        padding-bottom: 40px !important;
+    }
+
+    .cv-wrapper {
+        zoom: 0.45 !important; /* نسبة مناسبة وواضحة لمعظم الشاشات */
+        margin: 0 auto !important;
+        transform-origin: top center !important;
+    }
+    
+    /* تظبيط النوافذ المنبثقة (زي تسجيل الدخول) */
+    .modal-overlay > div {
+        width: 92% !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
     }
 }
