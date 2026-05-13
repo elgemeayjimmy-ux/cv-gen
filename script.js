@@ -17,8 +17,8 @@ if (typeof firebase !== 'undefined') {
     var auth = firebase.auth(); 
 }
 
-let currentUser = ""; 
-let currentRoom = null;
+currentUser = ""; 
+currentRoom = null;
 
 // --- [0.5] نظام الحسابات والبروفايل (Authentication & Profile) ---
 if (typeof auth !== 'undefined') {
