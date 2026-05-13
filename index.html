@@ -20,7 +20,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 </head>
 <body>
- <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
         <div style="background:var(--bg-secondary); padding:40px; border-radius:15px; text-align:center; width:350px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <h2 style="color:var(--accent); margin-bottom: 5px;">CV-GEN Workspace</h2>
             <p style="color:var(--text-muted); font-size:12px; margin-bottom: 20px;">Login to access your cloud CV</p>
@@ -34,6 +34,7 @@
             <p id="authError" style="color:#ff4757; font-size:12px; margin-top:15px; min-height: 15px;"></p>
         </div>
     </div>
+
     <aside class="main-sidebar" id="sidebar">
         <div class="sidebar-logo">
             <i class="fas fa-bolt"></i> <span class="nav-text">ULTIMATE</span>
@@ -58,6 +59,18 @@
                 <i class="fas fa-users-cog"></i> <span class="nav-text">Team Mode</span>
             </button>
         </nav>
+        
+        <div class="show-on-mobile mobile-bottom-menu">
+             <button class="btn-action" style="background:#10b981; color:white; width: 100%; margin-bottom:10px;" onclick="openJobPortal()">
+                <i class="fas fa-briefcase"></i> Jobs
+            </button>
+            <button onclick="openProfileModal()" style="background:var(--accent); color:#000; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; width: 100%; margin-bottom:10px;">
+             👤 <span>Profile</span>
+             </button>
+             <button onclick="logoutUser()" style="background:#ff4757; color:#fff; padding:10px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; width: 100%;">
+              Logout
+           </button>
+        </div>
     </aside>
 
     <main class="content-area">
@@ -83,16 +96,16 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button class="btn-action" style="background:#10b981; color:white;" onclick="openJobPortal()">
+                <button class="btn-action hide-on-mobile" style="background:#10b981; color:white;" onclick="openJobPortal()">
                     <i class="fas fa-briefcase"></i> Jobs
                 </button>
-                <button class="btn-action" style="background:#0f172a; color:white;" onclick="downloadPDF()">
+                <button class="btn-action hide-on-mobile" style="background:#0f172a; color:white;" onclick="downloadPDF()">
                     <i class="fas fa-download"></i> PDF
                 </button>
-                <button onclick="openProfileModal()" style="background:var(--accent); color:#000; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; margin-right: 10px;">
+                <button class="hide-on-mobile" onclick="openProfileModal()" style="background:var(--accent); color:#000; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; margin-right: 10px;">
                  👤 <span id="profileBtnName">Profile</span>
                  </button>
-                 <button onclick="logoutUser()" style="background:#ff4757; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; margin-right: 10px;">
+                 <button class="hide-on-mobile" onclick="logoutUser()" style="background:#ff4757; color:#fff; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size: 12px; margin-right: 10px;">
                   Logout
                </button>
             </div>
@@ -123,6 +136,10 @@
                 <div class="field-group"><label>Picture</label><input type="file" id="imageInput" accept="image/*"></div>
 
                 <button class="btn-action" style="background:#ef4444; color:white; width:100%; margin-top:10px;" onclick="resetForm()">Reset All</button>
+                
+                <button class="btn-action show-on-mobile" style="background:#0f172a; color:white; width:100%; margin-top:10px; border: 1px solid rgba(255,255,255,0.2);" onclick="downloadPDF()">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
             </div>
 
             <div class="preview-panel">
@@ -139,8 +156,7 @@
                     <div class="field-group"><label>Project Image</label><input type="file" id="portImage" accept="image/*"></div>
                     <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="addPortfolioItem()">Add to Portfolio</button>
                 </div>
-                <div id="portfolioGrid" class="portfolio-grid">
-                    </div>
+                <div id="portfolioGrid" class="portfolio-grid"></div>
             </div>
         </section>
 
@@ -150,7 +166,7 @@
                     <input type="text" id="aiDocPrompt" placeholder="What do you want to write about?" style="flex:1; padding:10px; border-radius:5px; border:1px solid #ccc;">
                     <button class="btn-action" style="background:var(--accent); color:#000;" onclick="aiGenerateArticleReal()">✨ Generate with AI</button>
                 </div>
-                <div id="doc-canvas" contenteditable="true" sty<div id="doc-canvas" contenteditable="true" style="width:100%; max-width:850px; min-height:800px; height:auto; margin-bottom:40px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000; overflow-y:auto;"></div>le="width:100%; max-width:850px; height:650px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000;"></div>
+                <div id="doc-canvas" contenteditable="true" style="width:100%; max-width:850px; min-height:800px; height:auto; margin-bottom:40px; background:white; padding:50px; outline:none; box-shadow:0 10px 40px rgba(0,0,0,0.1); color:#000; overflow-y:auto;"></div>
             </div>
         </section>
 
@@ -162,9 +178,7 @@
                     <div class="field-group"><label>Slide Content</label><textarea id="slideContent" rows="4" placeholder="Bullet points..."></textarea></div>
                     <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="addSlidePreview()">Add Slide</button>
                 </div>
-                
                 <div id="slidesPreviewList" style="margin-top:30px; display:flex; flex-direction:column; gap:15px;"></div>
-                
                 <button class="btn-action" style="background:#d83b01; color:white; width:100%; margin-top:20px; padding:15px; font-size:16px;" onclick="exportPPTX()">
                     <i class="fas fa-file-powerpoint"></i> Download .PPTX File
                 </button>
@@ -175,11 +189,8 @@
             <div style="padding:40px; width:100%; max-width:800px; margin:0 auto; color:var(--text-main);">
                 <div style="text-align:center; margin-bottom:30px;">
                     <h2>English Proficiency Placement Test</h2>
-                    <p style="font-size:13px; color:#888; margin-top:10px;">
-                        * Disclaimer: This is an unofficial placement test. Questions are modeled after CEFR standards.
-                    </p>
+                    <p style="font-size:13px; color:#888; margin-top:10px;">* Disclaimer: This is an unofficial placement test. Questions are modeled after CEFR standards.</p>
                 </div>
-                
                 <div id="testContainer" style="background:var(--bg-secondary); padding:30px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <div id="introTest">
                         <p>This test contains 30 multiple-choice questions. It evaluates grammar, vocabulary, and reading comprehension.</p>
@@ -207,28 +218,22 @@
             <div style="padding:40px; width:100%; max-width:600px; margin:0 auto; color:var(--text-main); text-align:center;">
                 <h2>Team Collaboration (Workspace)</h2>
                 <p style="color:#888; margin-bottom:30px; font-size:14px;">Collaborate in real-time on presentations and docs.</p>
-                
                 <div id="authUI" class="editor-panel" style="background:var(--bg-secondary);">
                     <h3>Login to Workspace</h3>
                     <div class="field-group"><input id="teamUsername" placeholder="Enter your username"></div>
                     <button class="btn-action" style="background:var(--accent); color:#000; margin-top:10px;" onclick="loginTeam()">Enter Workspace</button>
                 </div>
-
                 <div id="roomUI" class="editor-panel" style="background:var(--bg-secondary); display:none;">
                     <h3>Welcome, <span id="currentUserDisp" style="color:var(--accent);"></span>!</h3>
-                    
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button class="btn-action" style="flex:1; background:#10b981; color:white;" onclick="createRoom()">Create Room</button>
                         <button class="btn-action" style="flex:1; background:#3b82f6; color:white;" onclick="joinRoomPrompt()">Join Room</button>
                     </div>
-
                     <div id="activeRoomArea" style="margin-top:30px; display:none; text-align:left;">
                         <h4 style="border-bottom:1px solid #444; padding-bottom:10px;">Room: <span id="roomIdDisp"></span></h4>
                         <p style="font-size:12px; color:#888; margin-top:5px;">You are: <span id="roleDisp"></span></p>
-                        
                         <h5 style="margin-top:20px; margin-bottom:10px;">Team Members:</h5>
-                        <ul id="teamList" style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
-                            </ul>
+                        <ul id="teamList" style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;"></ul>
                     </div>
                 </div>
             </div>
@@ -239,19 +244,16 @@
         <div style="background:var(--bg-main); color:var(--text-main); padding:30px; border-radius:12px; width:450px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5); max-height: 80vh; overflow-y: auto;">
             <h3>Smart Job Search 💼</h3>
             <p style="font-size:13px; color:#888; margin:15px 0;">Searching for: <b id="searchJobTitle"></b></p>
-            
             <div style="background:var(--bg-secondary); padding:15px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:20px;">
                 <h4 style="margin-bottom:10px; font-size:14px;">🤖 AI Job Matcher</h4>
                 <button class="btn-action" style="background:var(--accent); color:#000; width:100%; padding:10px;" onclick="runSmartJobMatch()">Analyze My CV & Find Matches</button>
                 <div id="aiMatchResults" style="margin-top:15px; font-size:13px; text-align:left; display:none;"></div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="btn-action" style="background:#0a66c2; color:white; width:100%; padding:12px;" onclick="executeSearch('linkedin')">Search on LinkedIn</button>
                 <button class="btn-action" style="background:#0055D9; color:white; width:100%; padding:12px;" onclick="executeSearch('wuzzuf')">Search on Wuzzuf</button>
                 <button class="btn-action" style="background:#2164f4; color:white; width:100%; padding:12px;" onclick="executeSearch('indeed')">Search on Indeed</button>
             </div>
-            
             <button onclick="closeJobPortal()" style="margin-top:20px; border:none; background:none; color:#888; cursor:pointer; font-size:14px; text-decoration:underline;">Close</button>
         </div>
     </div>
@@ -262,9 +264,7 @@
         <div style="background:var(--bg-secondary); padding:40px; border-radius:15px; text-align:center; width:350px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <h2 style="color:var(--accent); margin-bottom: 5px;">My Profile</h2>
             <p style="color:var(--text-muted); font-size:12px; margin-bottom: 20px;">Change your display name in rooms</p>
-            
             <input type="text" id="newNickname" placeholder="New Nickname" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-main); color:white; outline:none;">
-            
             <button id="updateNameBtn" onclick="updateNickname()" style="width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:8px; margin-top:15px; cursor:pointer; font-weight:bold; font-size:14px;">Save Nickname</button>
             <button onclick="closeProfileModal()" style="width:100%; padding:12px; background:transparent; color:var(--text-muted); border:1px solid var(--border-color); border-radius:8px; margin-top:10px; cursor:pointer; transition: 0.3s;">Cancel</button>
         </div>
