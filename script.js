@@ -14,10 +14,10 @@ const firebaseConfig = {
 if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
     var database = firebase.database();
-    var auth = firebase.auth(); // تفعيل نظام الحسابات
+    var auth = firebase.auth(); 
 }
 
-let currentUser = ""; // هنخزن فيه اسم المستخدم الحالي
+let currentUser = ""; 
 let currentRoom = null;
 
 // --- [0.5] نظام الحسابات والبروفايل (Authentication & Profile) ---
@@ -26,8 +26,6 @@ if (typeof auth !== 'undefined') {
         const authModal = document.getElementById('authModal');
         if (user) {
             if(authModal) authModal.style.display = "none";
-            
-            // بيحاول ياخد النيك نيم الأول، لو ملقاش بياخد الإيميل
             currentUser = user.displayName || user.email.split('@')[0]; 
             
             if(document.getElementById("currentUserDisp")) document.getElementById("currentUserDisp").innerText = currentUser;
@@ -108,11 +106,11 @@ function openProfileModal() {
 function closeProfileModal() {
     document.getElementById('profileModal').style.display = "none";
 }
+
 // --- [1] إعدادات النظام والمزامنة التلقائية ---
 const inputsArr = ["name", "title", "email", "phone", "linkedin", "about", "experience", "education", "projectsText", "certifications", "skills"];
 
 window.onload = () => {
-    // 1. استرجاع البيانات برفق
     try {
         inputsArr.forEach(id => {
             let el = document.getElementById(id);
@@ -127,7 +125,6 @@ window.onload = () => {
         });
     } catch(e) { console.error("Error loading inputs:", e); }
 
-    // 2. تفعيل الدارك مود بأمان
     try {
         if(localStorage.getItem('theme') === 'dark') {
             let htmlTag = document.getElementById('html-tag') || document.documentElement;
@@ -137,9 +134,8 @@ window.onload = () => {
         }
     } catch(e) { console.error("Error loading theme:", e); }
 
-    // 3. رسم الواجهة إجبارياً
     if(typeof renderPortfolio === "function") renderPortfolio();
-    generateCV(); // رسم الورقة
+    generateCV(); 
 };
 
 // --- [2] التحكم في الواجهة ---
@@ -324,33 +320,45 @@ function deletePortfolio(index) {
     renderPortfolio();
 }
 
-// --- [5] محرك الذكاء الاصطناعي (Gemini API) والمقالات التشاركية ---
-const GEMINI_API_KEY = "AIzaSyB7R9kkZZUZ1mn7Yh-JBWrMHxNWSOKLlA8"; 
+// --- [5] محرك الذكاء الاصطناعي التلقائي (Auto-Detect AI Model) ---
+const GEMINI_API_KEY = "AIzaSyC7jzoBsgfIckzLDD_iddXGHWC7Yq8DGzM"; 
 
 async function fetchRealAI(promptText) {
     if(!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_API_KEY_HERE") {
-        return "⚠️ Please add your free API Key in the code.";
+        return "⚠️ Please add your API Key in the code.";
     }
     
+    let modelToUse = "";
+    
+    // 1. السؤال الأول: الكود هيكلم سيرفرات جوجل ويطلب منها قايمة الموديلات الشغالة للمفتاح ده
     try {
-        let modelToUse = "";
-        try {
-            const modelsReq = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-            const modelsData = await modelsReq.json();
-            if (modelsData.models) {
-                const validModels = modelsData.models.filter(m => 
-                    m.supportedGenerationMethods && 
-                    m.supportedGenerationMethods.includes("generateContent") && 
-                    m.name.includes("gemini")
-                );
-                if(validModels.length > 0) modelToUse = validModels[0].name;
+        const modelsReq = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
+        const modelsData = await modelsReq.json();
+        
+        if (modelsData.models) {
+            // هنفلتر الموديلات اللي بتفهم أوامر نصية بس
+            const validModels = modelsData.models.filter(m => 
+                m.supportedGenerationMethods && 
+                m.supportedGenerationMethods.includes("generateContent") && 
+                m.name.includes("gemini")
+            );
+            
+            if (validModels.length > 0) {
+                // الكود هيسحب أول موديل شغال أوتوماتيك (سواء 1.5 أو 2.0 أو حتى 3.0)
+                const flashModel = validModels.find(m => m.name.includes("flash"));
+                modelToUse = flashModel ? flashModel.name : validModels[0].name;
+            } else {
+                return "⚠️ مفتاح الـ API سليم ولكنه لا يمتلك صلاحية استخدام موديلات الذكاء الاصطناعي.";
             }
-        } catch (e) {
-            console.log("فشل في جلب قائمة الموديلات، سنستخدم الموديل الافتراضي.");
+        } else if (modelsData.error) {
+             return `⚠️ خطأ في المفتاح: ${modelsData.error.message}`;
         }
+    } catch (e) {
+        return "⚠️ فشل الاتصال بسيرفرات جوجل للتحقق من الموديلات.";
+    }
 
-        if (!modelToUse) modelToUse = "models/gemini-1.0-pro"; 
-
+    // 2. التنفيذ: بعد ما الكود عرف اسم الموديل الشغال، هيبعتله الطلب
+    try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelToUse}:generateContent?key=${GEMINI_API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -358,9 +366,11 @@ async function fetchRealAI(promptText) {
         });
 
         const data = await response.json();
-        if (!response.ok) return `API Error: ${data.error?.message || 'تم رفض الطلب'}`;
-        return data.candidates[0].content.parts[0].text;
-
+        if (response.ok) {
+            return data.candidates[0].content.parts[0].text;
+        } else {
+            return `API Error (${modelToUse}): ${data.error?.message || 'تم رفض الطلب'}`;
+        }
     } catch (error) {
         return "خطأ في الاتصال. الرجاء التحقق من الإنترنت.";
     }
@@ -372,7 +382,7 @@ async function aiGenerateAboutMe() {
     const experience = document.getElementById("experience").value || "";
     
     const aboutBox = document.getElementById("about");
-    aboutBox.value = "AI is thinking and writing based on your data... please wait ⏳";
+    aboutBox.value = "AI is thinking and checking available models... please wait ⏳";
     
     let prompt = `Write a highly personalized, confident, and professional 'About Me' summary for a CV.\nMy current Job Title: ${job}`;
     if (skills) prompt += `\nMy Skills: ${skills}`;
@@ -396,7 +406,6 @@ async function aiGenerateArticleReal() {
     let result = await fetchRealAI(prompt);
     result = result.replace(/```html|```/g, '');
     
-    // لو إحنا في غرفة Team Mode، ابعت المقال للسيرفر عشان الكل يشوفه
     if(currentRoom && typeof database !== 'undefined') {
         database.ref('rooms/' + currentRoom + '/article').set({ content: result });
     } else {
@@ -404,7 +413,7 @@ async function aiGenerateArticleReal() {
     }
 }
 
-// --- [6] محرك العروض التقديمية التشاركي (Live PowerPoint Generator) ---
+// --- [6] محرك العروض التقديمية التشاركي ---
 let pptSlides = [];
 
 function addSlidePreview() {
@@ -414,11 +423,9 @@ function addSlidePreview() {
 
     const slideData = { title, content };
 
-    // لو إحنا جوه غرفة تيم، ارمي الشريحة على السيرفر عشان الكل يشوفها
     if (currentRoom && typeof database !== 'undefined') {
         database.ref('rooms/' + currentRoom + '/slides').push(slideData);
     } else {
-        // لو شغال لوحدك، ضيفها محلياً عادي
         pptSlides.push(slideData);
         renderSingleSlide(slideData);
     }
@@ -455,9 +462,8 @@ function exportPPTX() {
     pres.writeFile({ fileName: "Team_Presentation.pptx" });
 }
 
-// --- [7] محرك اختبار الإنجليزي كامل 30 سؤال (English Test) ---
+// --- [7] محرك اختبار الإنجليزي ---
 const englishQuestions = [
-    // A1
     { q: "I ___ a student.", options: ["am", "is", "are", "be"], ans: 0 },
     { q: "She ___ to the park every day.", options: ["go", "goes", "going", "went"], ans: 1 },
     { q: "___ you like coffee?", options: ["Do", "Does", "Are", "Is"], ans: 0 },
@@ -468,7 +474,6 @@ const englishQuestions = [
     { q: "My brother ___ 20 years old.", options: ["has", "is", "have", "are"], ans: 1 },
     { q: "___ is your name?", options: ["Who", "How", "What", "When"], ans: 2 },
     { q: "I get up ___ 7 o'clock.", options: ["in", "on", "at", "to"], ans: 2 },
-    // A2
     { q: "I ___ playing football yesterday.", options: ["am", "was", "were", "be"], ans: 1 },
     { q: "We didn't ___ to the cinema.", options: ["go", "went", "going", "goes"], ans: 0 },
     { q: "She is ___ than her sister.", options: ["tall", "taller", "tallest", "more tall"], ans: 1 },
@@ -479,13 +484,11 @@ const englishQuestions = [
     { q: "If it rains, we ___ at home.", options: ["stay", "will stay", "stayed", "would stay"], ans: 1 },
     { q: "I enjoy ___ books in my free time.", options: ["read", "reading", "to read", "reads"], ans: 1 },
     { q: "He works ___ a bank.", options: ["in", "on", "at", "by"], ans: 0 },
-    // B1 / B2
     { q: "The car, ___ was blue, crashed.", options: ["who", "which", "where", "what"], ans: 1 },
     { q: "By the time I arrived, they ___ left.", options: ["have", "has", "had", "were"], ans: 2 },
     { q: "I am used to ___ early.", options: ["wake up", "waking up", "woke up", "woken up"], ans: 1 },
     { q: "She told me she ___ call me later.", options: ["will", "would", "can", "shall"], ans: 1 },
     { q: "Unless you ___, you will fail.", options: ["study", "don't study", "studied", "will study"], ans: 0 },
-    // C1
     { q: "Not only ___ late, but he also forgot the report.", options: ["he was", "was he", "is he", "he is"], ans: 1 },
     { q: "I'd rather you ___ here.", options: ["don't smoke", "didn't smoke", "not smoke", "won't smoke"], ans: 1 },
     { q: "It's high time you ___ a job.", options: ["get", "got", "getting", "have got"], ans: 1 },
@@ -556,7 +559,7 @@ function resetTest() {
     document.getElementById("introTest").style.display = "block";
 }
 
-// --- [8] محرك الوظائف والمطابقة الذكية (Job Search & AI Matcher) ---
+// --- [8] محرك الوظائف والمطابقة الذكية ---
 function openJobPortal() {
     const jobTitle = document.getElementById("title") ? document.getElementById("title").value : "Developer";
     const jobTitleDisplay = document.getElementById("searchJobTitle");
@@ -638,7 +641,7 @@ window.runSmartJobMatch = async function() {
     }
 };
 
-// --- [9] أدوات مساعدة إضافية (PDF, Language, Reset) ---
+// --- [9] أدوات مساعدة إضافية ---
 function downloadPDF() {
     const element = document.getElementById("cvResult");
     
@@ -650,7 +653,6 @@ function downloadPDF() {
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // إصلاح مشكلة الصفحة البيضاء وحذف الظل للـ PDF
     element.style.zoom = "1";
     element.style.boxShadow = "none"; 
     element.style.height = "297mm"; 
@@ -686,10 +688,7 @@ function resetForm() {
     }
 }
 
-// --- [10] محرك Team Mode اللحظي الشامل (Live Firebase Sync) ---
-let currentUser = "";
-let currentRoom = null;
-
+// --- [10] محرك Team Mode اللحظي الشامل ---
 function loginTeam() {
     const user = document.getElementById("teamUsername").value;
     if(!user) return alert("Enter a username!");
@@ -705,7 +704,6 @@ function createRoom() {
     const roomId = Math.floor(1000 + Math.random() * 9000).toString();
     currentRoom = roomId;
     
-    // إنشاء الغرفة في فايربيز وإضافة المستخدم كأدمن
     database.ref('rooms/' + roomId + '/members/' + currentUser).set({ role: "Admin (Creator)" });
     
     setupRoomUI(roomId, "Admin (Creator)");
@@ -720,7 +718,6 @@ function joinRoomPrompt() {
     if(!roomId) return;
     currentRoom = roomId;
 
-    // إضافة المستخدم كعضو
     database.ref('rooms/' + roomId + '/members/' + currentUser).set({ role: "Member" });
 
     setupRoomUI(roomId, "Member");
@@ -733,11 +730,9 @@ function setupRoomUI(roomId, role) {
     document.getElementById("roleDisp").innerText = role;
 }
 
-// الاستماع للتغييرات الحية (شامل كل أقسام المنصة)
 function listenToRoomSync() {
     if(!currentRoom || typeof database === 'undefined') return;
 
-    // 1. مزامنة الأعضاء المتصلين
     database.ref('rooms/' + currentRoom + '/members').on('value', (snapshot) => {
         const members = snapshot.val();
         let listHTML = "";
@@ -749,7 +744,6 @@ function listenToRoomSync() {
         document.getElementById("teamList").innerHTML = listHTML;
     });
 
-    // 2. مزامنة الكتابة في الـ CV
     database.ref('rooms/' + currentRoom + '/cvData').on('value', (snapshot) => {
         const data = snapshot.val();
         if(data && data.updatedBy !== currentUser) {
@@ -766,15 +760,13 @@ function listenToRoomSync() {
         }
     });
 
-    // 3. مزامنة شرائح الباوربوينت اللحظية
     database.ref('rooms/' + currentRoom + '/slides').on('value', (snapshot) => {
         const slidesData = snapshot.val();
-        pptSlides = []; // تفريغ القديم محلياً
+        pptSlides = []; 
         const list = document.getElementById("slidesPreviewList");
         if(list) list.innerHTML = ""; 
         
         if(slidesData) {
-            // إضافة كل الشرائح الجديدة وتحديث الشاشة لكل الفريق
             for(let key in slidesData) {
                 pptSlides.push(slidesData[key]);
                 renderSingleSlide(slidesData[key]);
@@ -782,7 +774,6 @@ function listenToRoomSync() {
         }
     });
 
-    // 4. مزامنة المقالات المشتركة
     database.ref('rooms/' + currentRoom + '/article').on('value', (snapshot) => {
         const data = snapshot.val();
         if(data && data.content) {
@@ -792,7 +783,6 @@ function listenToRoomSync() {
     });
 }
 
-// دالة لرفع تعديلات الـ CV للسيرفر اللحظي
 function syncDataToFirebase() {
     if(!currentRoom || typeof database === 'undefined') return;
     let dataToSync = { updatedBy: currentUser };
