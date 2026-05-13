@@ -449,3 +449,10 @@ button[onclick*="aiGenerate"]:hover {
         overflow-y: auto !important;
     }
 }
+.top-bar {
+  display: flex;
+  flex-direction: row; /* عشان نضمن إنهم في صف واحد */
+  justify-content: space-between; /* عشان نوزع المسافات بينهم بشكل شيك */
+  align-items: center; /* عشان يبقوا كلهم على نفس الخط الأفقي */
+  flex-wrap: nowrap; /* عشان نمنع أي عنصر ينزل تحت */
+}
