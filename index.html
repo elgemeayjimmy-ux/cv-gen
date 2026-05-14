@@ -100,7 +100,7 @@
         }
         
         /* جعل السي في يتوسط الشاشة */
-        #cv-section {
+        #cv-section.active {
             display: flex;
             justify-content: center;
         }
@@ -167,12 +167,12 @@
                 <i class="fas fa-bars"></i>
             </button>
             
-            <select id="cvType" onchange="generateCV()" class="toolbar-select" style="flex-shrink: 0;">
+            <select id="cvType" onchange="generateCV()" class="toolbar-select" style="flex-shrink: 0; height:40px; font-size:15px; padding:2px 6px; width:170px;">
                 <option value="modern">Modern Professional</option>
                 <option value="ats">ATS Classic</option>
             </select>
 
-            <select id="langToggle" onchange="toggleLanguage()" class="toolbar-select" style="flex-shrink: 0;">
+            <select id="langToggle" onchange="toggleLanguage()" class="toolbar-select" style="flex-shrink: 0; height:40px; font-size:15px; padding:2px 6px; width:120px;">
                 <option value="en">EN</option>
                 <option value="ar">AR</option>
             </select>
@@ -199,10 +199,10 @@
         </nav>
 
         <section id="cv-section" class="app-tab active">
-            <div class="preview-panel">
-                <div class="cv-wrapper" id="cvResult"></div>
-            </div>
-        </section>
+    <div class="preview-panel">
+        <div class="cv-wrapper" id="cvResult"></div>
+    </div>
+</section>
 
         <section id="portfolio-section" class="app-tab">
             <div class="portfolio-container" style="padding: 40px; width: 100%; max-width: 1200px; margin: 0 auto; overflow-y: auto;">
@@ -300,6 +300,20 @@
     <button class="open-inputs-btn" onclick="toggleInputsPanel()">
         <i class="fas fa-pen"></i> Edit CV
     </button>
+
+    <div style="position:fixed; bottom:80px; right:25px; display:flex; flex-direction:column; gap:10px; z-index:900;">
+
+    <button onclick="downloadPDF()" 
+        style="background:var(--accent); color:#000; border:none; padding:12px 16px; border-radius:30px; font-weight:bold; cursor:pointer;">
+        📄 PDF
+    </button>
+
+    <button onclick="resetForm()" 
+        style="background:#ef4444; color:white; border:none; padding:12px 16px; border-radius:30px; font-weight:bold; cursor:pointer;">
+        🗑 Reset
+    </button>
+
+</div>
 
     <aside class="inputs-side-panel" id="inputsPanel">
         <div class="panel-header">
