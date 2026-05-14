@@ -135,7 +135,13 @@ body {
 }
 
 .app-tab.active { display: grid; }
-#cv-section.active { grid-template-columns: 450px 1fr; gap: 20px; }
+#cv-section.active {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
+    width: 100%;
+}
 
 .editor-panel {
     background: var(--glass-bg);
@@ -194,10 +200,14 @@ body {
     background: rgba(0, 0, 0, 0.3);
 }
 
+input[type="file"] {
+    color: transparent;
+}
+
 .preview-panel {
     background: transparent;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     overflow-y: auto;
     padding: 0 20px 20px 20px;
 }
@@ -214,6 +224,44 @@ body {
 }
 
 /* --- البورتفوليو والخيارات (Glass Elements) --- */
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.portfolio-card {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.portfolio-card img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 15px 15px 0 0;
+    display: block;
+}
+
+.portfolio-card-content {
+    padding: 15px;
+    text-align: center;
+}
+
+.portfolio-card-content h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.portfolio-card-content p {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+
 .portfolio-card, .test-option, #testContainer {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(15px);
