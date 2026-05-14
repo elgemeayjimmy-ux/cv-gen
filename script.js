@@ -407,7 +407,7 @@ function deletePortfolio(index) {
 }
 
 // --- [5] محرك الذكاء الاصطناعي (Gemini API) ---
-const GEMINI_API_KEY = "AIzaSyC7jzoBsgfIckzLDD_iddXGHWC7Yq8DGzM"; 
+const GEMINI_API_KEY = "AIzaSyCZITyiG8fnrhnmHfxm4TmQx2oP2swDwjA"; 
 
 async function fetchRealAI(promptText) {
     if(!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_API_KEY_HERE") {
